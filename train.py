@@ -1,16 +1,10 @@
-import matplotlib
-import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
-import scipy.stats as st
-import xarray as xr
-
 import torch
 from torch import nn
-import torch.nn.utils.prune as prune
 from torch.utils.data import DataLoader
-from torch.utils.data import Dataset
-import Model
+
+import model
 from loaddata import newnorm, data_loader
 
 
@@ -71,7 +65,7 @@ VTGWSPECs = fs["VTGWSPEC"]
 dim_NN = int(564)
 dim_NNout = int(140)
 
-model = Model.FullyConnected()
+model = model.FullyConnected()
 
 train_losses = []
 val_losses = [0]
@@ -83,11 +77,11 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  # weight_dec
 
 s_list = list(range(1, 6))
 
-for iter in s_list:
-    if iter > 1:
+for val in s_list:
+    if val > 1:
         model.load_state_dict(torch.load("conv_torch.pth"))
-    print("data loader iteration", iter)
-    filename = "./Demodata/Demo_timestep_" + str(iter).zfill(3) + ".nc"
+    print("data loader iteration", val)
+    filename = f"./Demodata/Demo_timestep_{str(val).zfill(3)}.nc"
     print("working on: ", filename)
 
     F = nc.Dataset(filename)
@@ -134,7 +128,7 @@ for iter in s_list:
         U, V, T, DSE, NM, NETDT, Z3, RHOI, PS, lat, lon, UTGWSPEC, VTGWSPEC
     )
 
-    data = Model.myDataset(X=x_train, Y=y_train)
+    data = model.myDataset(X=x_train, Y=y_train)
 
     batch_size = 128
 
@@ -153,10 +147,10 @@ for iter in s_list:
             print(f"Epoch {t+1}\n-------------------------------")
             print(val_losses[-1])
             print("counter=" + str(early_stopper.counter))
-        train_loss = Model.train_loop(train_dataloader, model, nn.MSELoss(), optimizer)
+        train_loss = model.train_loop(train_dataloader, model, nn.MSELoss(), optimizer)
 
         train_losses.append(train_loss)
-        val_loss = Model.val_loop(val_dataloader, model, nn.MSELoss())
+        val_loss = model.val_loop(val_dataloader, model, nn.MSELoss())
         val_losses.append(val_loss)
         if early_stopper.early_stop(val_loss):
             print("BREAK!")
