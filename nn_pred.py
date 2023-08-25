@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 import numpy as np
 import netCDF4 as nc
-import Model
+import model
 from loaddata import newnorm, data_loader
 
 
@@ -57,7 +57,7 @@ VTGWSPECs = fs["VTGWSPEC"]
 
 
 # Initialize the network and the Adam optimizer
-GWnet = Model.FullyConnected()
+GWnet = model.FullyConnected()
 
 optimizer = torch.optim.Adam(GWnet.parameters(), lr=learning_rate)
 
@@ -130,7 +130,7 @@ for val in s_list:
     print("shape of x_test", np.shape(x_test))
     print("shape of y_test", np.shape(y_test))
 
-    data = Model.myDataset(X=x_test, Y=y_test)
+    data = model.MyDataset(X=x_test, Y=y_test)
     test_loader = DataLoader(data, batch_size=len(data), shuffle=False)
     print(test_loader)
 

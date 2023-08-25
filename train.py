@@ -21,7 +21,7 @@ class EarlyStopper:
             self.counter = 0
 
             # save model
-            torch.save(model.state_dict(), "conv_torch.pth")
+            torch.save(nn_model.state_dict(), "conv_torch.pth")
 
         elif validation_loss > (self.min_validation_loss + self.min_delta):
             self.counter += 1
@@ -65,21 +65,21 @@ VTGWSPECs = fs["VTGWSPEC"]
 dim_NN = int(564)
 dim_NNout = int(140)
 
-model = model.FullyConnected()
+nn_model = model.FullyConnected()
 
 train_losses = []
 val_losses = [0]
 
 learning_rate = 1e-5
 epochs = 100
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  # weight_decay=1e-5
+optimizer = torch.optim.Adam(nn_model.parameters(), lr=learning_rate)  # weight_decay=1e-5
 
 
 s_list = list(range(1, 6))
 
 for val in s_list:
     if val > 1:
-        model.load_state_dict(torch.load("conv_torch.pth"))
+        nn_model.load_state_dict(torch.load("conv_torch.pth"))
     print("data loader iteration", val)
     filename = f"./Demodata/Demo_timestep_{str(val).zfill(3)}.nc"
     print("working on: ", filename)
@@ -128,7 +128,7 @@ for val in s_list:
         U, V, T, DSE, NM, NETDT, Z3, RHOI, PS, lat, lon, UTGWSPEC, VTGWSPEC
     )
 
-    data = model.myDataset(X=x_train, Y=y_train)
+    data = model.MyDataset(X=x_train, Y=y_train)
 
     batch_size = 128
 
@@ -147,10 +147,10 @@ for val in s_list:
             print(f"Epoch {t+1}\n-------------------------------")
             print(val_losses[-1])
             print("counter=" + str(early_stopper.counter))
-        train_loss = model.train_loop(train_dataloader, model, nn.MSELoss(), optimizer)
+        train_loss = model.train_loop(train_dataloader, nn_model, nn.MSELoss(), optimizer)
 
         train_losses.append(train_loss)
-        val_loss = model.val_loop(val_dataloader, model, nn.MSELoss())
+        val_loss = model.val_loop(val_dataloader, nn_model, nn.MSELoss())
         val_losses.append(val_loss)
         if early_stopper.early_stop(val_loss):
             print("BREAK!")
