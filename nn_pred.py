@@ -2,30 +2,19 @@
 The following is an import of PyTorch libraries.
 """
 import torch
-import torch.nn as nn
-import torch.nn.functional as nnF
 from torch.utils.data import DataLoader
-import torchvision
-from torchvision import datasets, transforms
-from torchvision.utils import save_image
-import matplotlib.pyplot as plt
 import numpy as np
-import random
 import netCDF4 as nc
 import Model
 from loaddata import newnorm, data_loader
 
 
-"""
-Determine if any GPUs are available
-"""
+# Determine if any GPUs are available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 
 
-"""
-Initialize Hyperparameters
-"""
+# Initialize Hyperparameters
 dim_NN = 564
 dim_NNout = 140
 
@@ -67,9 +56,7 @@ UTGWSPECs = fs["UTGWSPEC"]
 VTGWSPECs = fs["VTGWSPEC"]
 
 
-"""
-Initialize the network and the Adam optimizer
-"""
+# Initialize the network and the Adam optimizer
 GWnet = Model.FullyConnected()
 
 optimizer = torch.optim.Adam(GWnet.parameters(), lr=learning_rate)
@@ -77,12 +64,12 @@ optimizer = torch.optim.Adam(GWnet.parameters(), lr=learning_rate)
 
 s_list = list(range(5, 6))
 
-for iter in s_list:
-    if iter > 0:
+for val in s_list:
+    if val > 0:
         GWnet.load_state_dict(torch.load("./conv_torch.pth"))
         GWnet.eval()
-    print("data loader iteration", iter)
-    filename = "./Demodata/Demo_timestep_" + str(iter).zfill(3) + ".nc"
+    print("data loader iteration", val)
+    filename = f"./Demodata/Demo_timestep_{str(val).zfill(3)}.nc"
 
     F = nc.Dataset(filename)
     PS = np.asarray(F["PS"][0, :, :])
