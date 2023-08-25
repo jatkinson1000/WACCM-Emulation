@@ -1,17 +1,11 @@
-import netCDF4 as nc
-import numpy as np
-import scipy.stats as st
-import xarray as xr
-
+"""Module containing model architecture, Dataset, training, and validation loops."""
 import torch
 from torch import nn
-import torch.nn.utils.prune as prune
-from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 
 
 # Required for feeding the data iinto NN.
-class myDataset(Dataset):
+class MyDataset(Dataset):
     def __init__(self, X, Y):
         self.features = torch.tensor(X, dtype=torch.float64)
         self.labels = torch.tensor(Y, dtype=torch.float64)
@@ -65,7 +59,6 @@ class FullyConnected(nn.Module):
 
 # training loop
 def train_loop(dataloader, model, loss_fn, optimizer):
-    size = len(dataloader.dataset)
     avg_loss = 0
     for batch, (X, Y) in enumerate(dataloader):
         # Compute prediction and loss
